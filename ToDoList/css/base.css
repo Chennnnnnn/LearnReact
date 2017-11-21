@@ -1,0 +1,28 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+}
+html{
+    font-size: 62.5%;
+    font-size:1.562vw; //屏幕宽100vw
+}
+a{
+    text-decoration: none;
+    color: inherit;
+}
+a:visited{
+        color: inherit;
+}
+textarea,input{
+    outline: none;
+}
+textarea{
+        resize: none;
+}
+img{
+    border:0;
+}
+li{
+    list-style: none;
+}

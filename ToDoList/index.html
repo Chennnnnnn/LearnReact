@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="./build/react.js"></script>
+    <script src="./build/react-dom.js"></script>
+    <script src="./build/browser.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/base.css">
+    <link rel="stylesheet" type="text/css" href="./css/todolist.css">
+  </head>
+  <body>
+    <div id="AppRoot" class="waper"></div>
+    <script type="text/babel">
+/*总组件*/
+class All extends React.Component {
+  constructor(props){
+    super(props);
+    var lists = JSON.parse(localStorage.todolists);
+    this.state = {
+      value:'',
+      select: 'all',
+      lists: lists};
+    this.handleChangeInput = this.handleChangeInput.bind(this);
+    this.handleChangeList = this.handleChangeList.bind(this);
+    this.deleteValue = this.deleteValue.bind(this);
+    this.handleChangeState = this.handleChangeState.bind(this);
+    this.handleKey = this.handleKey.bind(this);
+    this.handleChangeSelect = this.handleChangeSelect.bind(this);
+    this.clear = this.clearLists.bind(this);
+  }
+
+  handleChangeInput (e) {
+    this.setState({ value: e.target.value});
+  }
+
+  handleChangeSelect (select) {
+    this.setState({ select: select})
+  }
+
+  handleChangeList () {
+    if (this.state.value !== '') {
+      this.setState((prevState,props) => (
+         prevState.lists.push({ title:this.state.value, finish:false })
+      ));
+      this.setState({ value: ''});
+    }
+  }
+
+  handleChangeState (index) {
+    this.setState((prevState,props) => (
+       prevState.lists[index].finish = prevState.lists[index].finish ? false : true
+    ));
+  }
+
+  handleKey (e) {
+    if (e.keyCode == 13 && this.state.value !== '') {
+        this.setState((prevState,props) => (
+           prevState.lists.push({ title:this.state.value, finish:false })
+        ));
+        this.setState({ value: ''});
+    }
+  }
+
+  deleteValue (index) {
+    this.setState((prevState,props) => (
+       prevState.lists.splice(index,1)
+    ));
+  }
+  clearLists () {
+    this.setState({lists:[]});
+  }
+
+  /*组件数据更新将数据缓存在浏览器*/
+  componentDidUpdate() {
+    localStorage.todolists = JSON.stringify(this.state.lists);
+  }
+
+  render () {
+    return (
+      <div onKeyUp={this.handleKey}>
+        <h1>ToDoList</h1>
+        <input value={this.state.value} onChange={this.handleChangeInput} ref={(input) => {this.textInput = input;}}/>
+        <button onClick={this.handleChangeList} className='add'>添加</button>
+        <List lists={this.state.lists} delete={this.deleteValue} changeState={this.handleChangeState} select={this.state.select}/>
+        <Foot select={this.handleChangeSelect} clear={this.clear}/>
+      </div>
+    )
+  }
+}
+
+/*列表
+ *delete:删除点击函数
+ *lists:列表数组
+ */
+function List (props) {
+  const lists = props.lists;
+  const select = props.select;
+  const listItems = lists.map((list, index) => 
+  /*判断状态*/
+    (select == 'all' || ((select == 'unCompleted') != list.finish) ?
+      (<li className={list.finish?'willtodo finished':'willtodo'} key={index}>
+        <input type="checkbox" className="finish" onChange={() => props.changeState(index)} checked={list.finish}/>
+        {list.title}
+        <span className='delete' onClick={() => props.delete(index)}>X</span>
+      </li>) : ''
+  ));
+  return (
+    <ul>
+      {listItems}
+    </ul>
+  );
+}
+
+/*选择按钮*/
+function Foot (props) {
+  return (
+    <div className='foot'>
+      <button onClick={() => props.select('all')}>全部</button>
+      <button onClick={() => props.select('unCompleted')}>未完成</button>
+      <button onClick={() => props.select('Completed')}>已完成</button>
+      <button onClick={props.clear}>删除全部</button>
+    </div>
+  )
+}
+
+ReactDOM.render(
+  <All />,
+  document.getElementById('AppRoot')
+); 
+    </script>
+  </body>
+</html>
